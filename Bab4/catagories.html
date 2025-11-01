@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Kategori - Omah Sawah Homestay</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="header">
+    <div class="container wrap">
+      <div class="brand">Omah Sawah Homestay</div>
+      <nav class="nav">
+        <a href="index.html">Home</a>
+        <a href="dashboard.html">Dashboard</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h2>Daftar Kategori Kamar</h2>
+      <a class="button" href="category-form.html">Tambah Kategori</a>
+    </div>
+
+    <div class="categories-grid" id="catGrid">
+      <!-- contoh card kategori -->
+      <div class="category-card">
+        <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=900&q=80" alt="Standard">
+        <div class="body">
+          <h3>Kamar Standard</h3>
+          <p>Kamar nyaman untuk 2 orang, pemandangan taman.</p>
+          <p>
+            <a class="button" href="category-form.html">Edit</a>
+            <a class="button del-btn" href="#" style="background:#b91c1c; margin-left:8px">Hapus</a>
+          </p>
+        </div>
+      </div>
+
+      <div class="category-card">
+        <img src="https://images.unsplash.com/photo-1600585154207-16692f1b91af?auto=format&fit=crop&w=900&q=80" alt="Deluxe">
+        <div class="body">
+          <h3>Kamar Deluxe</h3>
+          <p>Balcony, pemandangan sawah.</p>
+          <p>
+            <a class="button" href="category-form.html">Edit</a>
+            <a class="button del-btn" href="#" style="background:#b91c1c; margin-left:8px">Hapus</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    /* catagories.html:
+       - PopUp: confirm delete per card
+       - PopUp: bulk import modal
+       - Events: click image enlarge, hover card tilt, doubleclick to favorite
+       - localStorage: favorite categories
+       - fetch sample to load more categories (pseudo)
+    */
+
+    // delete confirm on every .del-btn
+    document.querySelectorAll('.del-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const card = e.target.closest('.category-card');
+        if (confirm('Yakin mau hapus kategori ini?')) {
+          card.remove();
+          showToast('Kategori dihapus.');
+        }
+      });
+    });
+
+    // showToast util (simple)
+    const toast = document.createElement('div');
+    toast.id = 'catToast';
+    toast.style = 'position:fixed;left:50%;bottom:30px;transform:translateX(-50%);background:#222;color:#fff;padding:10px;border-radius:8px;display:none;z-index:9999';
+    document.body.appendChild(toast);
+    function showToast(msg) {
+      toast.textContent = msg; toast.style.display = 'block';
+      setTimeout(() => toast.style.display = 'none', 2200);
+    }
+
+    // PopUp: bulk import modal
+    const importModal = document.createElement('div');
+    importModal.innerHTML = `
+      <div id="importBox" style="display:none;position:fixed;top:25%;left:50%;transform:translateX(-50%);
+           background:white;padding:18px;border-radius:8px;box-shadow:0 8px 30px rgba(0,0,0,0.12);z-index:1000;">
+        <h3>Import Kategori</h3>
+        <p>Upload CSV/JSON untuk tambah banyak kategori (simulasi).</p>
+        <input type="file" id="importFile"><br><br>
+        <button id="closeImport">Tutup</button>
+      </div>`;
+    document.body.appendChild(importModal);
+    const importBtn = document.createElement('button');
+    importBtn.textContent = 'Import Kategori';
+    importBtn.style.marginLeft = '12px';
+    document.querySelector('main .container')?.appendChild(importBtn);
+    importBtn.addEventListener('click', () => document.getElementById('importBox').style.display = 'block');
+    document.getElementById('closeImport')?.addEventListener('click', () => document.getElementById('importBox').style.display = 'none');
+
+    // Events:
+    // enlarge image on click
+    document.querySelectorAll('.category-card img').forEach(img => {
+      img.style.cursor = 'zoom-in';
+      img.addEventListener('click', () => {
+        const overlay = document.createElement('div');
+        overlay.innerHTML = `<div style="position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:2000;">
+          <img src="${img.src}" style="max-width:90%;max-height:80%;border-radius:8px"/>
+        </div>`;
+        document.body.appendChild(overlay);
+        overlay.addEventListener('click', () => overlay.remove());
+      });
+    });
+
+    // hover tilt and dblclick favorite
+    document.querySelectorAll('.category-card').forEach(card => {
+      card.addEventListener('mouseenter', () => card.style.transform = 'translateY(-6px)');
+      card.addEventListener('mouseleave', () => card.style.transform = 'translateY(0)');
+      card.addEventListener('dblclick', () => {
+        const title = card.querySelector('h3')?.textContent || 'Kategori';
+        let fav = JSON.parse(localStorage.getItem('favCats') || '[]');
+        if (!fav.includes(title)) {
+          fav.push(title);
+          localStorage.setItem('favCats', JSON.stringify(fav));
+          showToast(`${title} ditandai favorit`);
+        } else {
+          showToast(`${title} sudah favorit`);
+        }
+      });
+    });
+
+    // fetch sample to append a category (async)
+    async function loadExtraCategory() {
+      try {
+        const res = await fetch('https://jsonplaceholder.typicode.com/photos/1');
+        const j = await res.json();
+        const wrapper = document.getElementById('catGrid');
+        const node = document.createElement('div');
+        node.className = 'category-card';
+        node.innerHTML = `<img src="${j.url}" alt="Extra"><div class="body"><h3>Extra Room</h3><p>Deskripsi tambahan.</p><p><a class="button" href="#">Edit</a> <a class="button" href="#" style="background:#b91c1c; margin-left:8px">Hapus</a></p></div>`;
+        wrapper.appendChild(node);
+      } catch (e) { console.error(e); }
+    }
+    setTimeout(loadExtraCategory, 2500);
+  </script>
+</body>
+</html>
