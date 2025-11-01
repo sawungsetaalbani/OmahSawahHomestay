@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Omah Sawah Homestay</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Toast CSS */
+    #toast {
+      visibility: hidden;
+      min-width: 250px;
+      margin-left: -125px;
+      background-color: #333;
+      color: #fff;
+      text-align: center;
+      border-radius: 8px;
+      padding: 12px;
+      position: fixed;
+      z-index: 1;
+      left: 50%;
+      bottom: 30px;
+      font-size: 16px;
+      opacity: 0;
+      transition: opacity 0.5s, bottom 0.5s;
+    }
+    #toast.show {
+      visibility: visible;
+      opacity: 1;
+      bottom: 50px;
+    }
+    .highlight {
+      color: #3b82f6;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1 id="main-title">Selamat Datang di Omah Sawah Homestay</h1>
+  <p id="desc">Nikmati suasana pedesaan yang asri dan tenang di tengah hamparan sawah hijau.</p>
+
+  <h3>Menu Navigasi</h3>
+  <ul id="nav-menu">
+    <li><a href="login.html">Login</a></li>
+    <li><a href="register.html">Register</a></li>
+    <li><a href="dashboard.html">Dashboard</a></li>
+    <li><a href="about.html">Tentang Kami</a></li>
+  </ul>
+
+  <h2>Tentang Omah Sawah Homestay</h2>
+  <p id="about">Omah Sawah Homestay menawarkan pengalaman menginap tradisional dengan pemandangan sawah dan udara segar. Cocok untuk wisata keluarga atau liburan santai.</p>
+
+  <h3>Kontak</h3>
+  <p>Email: <span id="email">omahsawahhomestay@gmail.com</span></p>
+  <p>Telepon: <span id="phone">0812-3456-7890</span></p>
+
+  <!-- Toast -->
+  <div id="toast">Ini toast notification!</div>
+
+  <script>
+    // === Minimal 3 DOM Manipulation ===
+
+    // 1. Ubah warna title
+    const title = document.getElementById('main-title');
+    title.style.color = '#16a34a'; // hijau segar
+
+    // 2. Highlight kata tertentu di deskripsi
+    const desc = document.getElementById('desc');
+    desc.innerHTML = desc.textContent.replace('pedesaan', '<span class="highlight">pedesaan</span>');
+
+    // 3. Tambahkan tombol interaktif
+    const button = document.createElement('button');
+    button.textContent = 'Klik untuk Lihat Toast';
+    button.style.padding = '8px 16px';
+    button.style.marginTop = '12px';
+    button.style.cursor = 'pointer';
+    document.body.insertBefore(button, document.getElementById('about'));
+
+    // === Toast / Snackbar ===
+    const toast = document.getElementById('toast');
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.className = 'show';
+      setTimeout(() => { toast.className = toast.className.replace('show', ''); }, 3000);
+    }
+
+    button.addEventListener('click', () => showToast('Selamat datang di Omah Sawah Homestay!'));
+  </script>
+</body>
+</html>
