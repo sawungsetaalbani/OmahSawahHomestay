@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - Omah Sawah Homestay</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="login-grid">
+    <div class="login-left">
+      <h1>Omah Sawah Homestay</h1>
+      <p>Rasakan kenyamanan menginap di tengah hamparan sawah hijau 🌾</p>
+    </div>
+
+    <div class="login-right">
+      <div class="login-box">
+        <h2>Login Akun</h2>
+        <form id="loginForm" action="dashboard.html" method="post">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" required>
+
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" required>
+
+          <button type="submit">Masuk</button>
+        </form>
+        <p>Belum punya akun? <a href="register.html">Daftar Sekarang</a></p>
+        <p><a href="index.html">Kembali ke Beranda</a></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+
+    const loginForm = document.getElementById('loginForm');
+
+    // remember me checkbox (UI added without changing original structure)
+    const remember = document.createElement('label');
+    remember.innerHTML = '<input type="checkbox" id="rememberMe"> Ingat saya';
+    loginForm.appendChild(document.createElement('br'));
+    loginForm.appendChild(remember);
+
+    // password toggle
+    const pwd = document.getElementById('password');
+    const toggleBtn = document.createElement('button');
+    toggleBtn.type = 'button';
+    toggleBtn.textContent = 'Tampilkan';
+    toggleBtn.style.marginLeft = '8px';
+    pwd.parentNode.insertBefore(toggleBtn, pwd.nextSibling);
+    toggleBtn.addEventListener('click', () => {
+      pwd.type = pwd.type === 'password' ? 'text' : 'password';
+      toggleBtn.textContent = pwd.type === 'password' ? 'Tampilkan' : 'Sembunyikan';
+    });
+
+    // simple modal for success
+    const loginModal = document.createElement('div');
+    loginModal.innerHTML = `
+      <div id="loginModal" style="display:none;position:fixed;top:40%;left:50%;transform:translate(-50%,-50%);
+           background:white;padding:20px;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,0.2);z-index:1000;">
+        <h3>Login Berhasil</h3>
+        <p>Selamat datang kembali!</p>
+        <button id="closeLoginModal">Tutup</button>
+      </div>`;
+    document.body.appendChild(loginModal);
+    const loginModalBox = document.getElementById('loginModal');
+    const closeLoginModal = document.getElementById('closeLoginModal');
+    closeLoginModal?.addEventListener('click', () => loginModalBox.style.display = 'none');
+
+    // events: input focus highlight
+    document.querySelectorAll('#loginForm input').forEach(i => {
+      i.addEventListener('focus', () => i.style.boxShadow = '0 0 0 3px rgba(34,197,94,0.12)');
+      i.addEventListener('blur', () => i.style.boxShadow = 'none');
+    });
+
+    // submit handler: prevent actual redirect, do fake fetch and store to localStorage if remember checked
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const pass = document.getElementById('password').value;
+      showTempMsg('Memeriksa kredensial...');
+      try {
+        const res = await fetch('https://jsonplaceholder.typicode.com/users/1');
+        const json = await res.json();
+        // demo check: jika email mengandung nama dari json => sukses
+        if (email.includes(json.username.toLowerCase()) || email.includes('@')) {
+          loginModalBox.style.display = 'block';
+          if (document.getElementById('rememberMe').checked) {
+            localStorage.setItem('savedEmail', email);
+          }
+          // simulate redirect after short delay (here just log)
+          console.log('login ok -> redirect ke dashboard (simulasi)');
+        } else {
+          alert('Login gagal: kredensial tidak cocok (simulasi).');
+        }
+      } catch (err) {
+        console.error('err fetch login', err);
+      }
+    });
+
+    // helper toast-like message
+    function showTempMsg(msg) {
+      const el = document.createElement('div');
+      el.textContent = msg;
+      el.style = 'position:fixed;left:50%;top:10%;transform:translateX(-50%);background:#222;color:#fff;padding:8px 12px;border-radius:6px;z-index:9999';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 2200);
+    }
+
+    // on load, autofill email if saved
+    window.addEventListener('load', () => {
+      const saved = localStorage.getItem('savedEmail');
+      if (saved) document.getElementById('email').value = saved;
+    });
+  </script>
+</body>
+</html>

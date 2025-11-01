@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard - Omah Sawah Homestay</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="header">
+    <div class="container wrap">
+      <div class="brand">Omah Sawah Homestay - Dashboard</div>
+      <nav class="nav">
+        <a href="index.html">Home</a>
+        <a href="categories.html">Kategori</a>
+        <a href="reservations.html">Reservasi</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <h2>Ringkasan</h2>
+    <div class="grid-2">
+      <div class="card">
+        <h3>Categories</h3>
+        <p>Jumlah kategori: <strong id="cat-count">4</strong></p>
+        <p><a class="button" href="categories.html">Kelola Kategori</a></p>
+      </div>
+
+      <div class="card">
+        <h3>Reservations</h3>
+        <p>Reservasi aktif: <strong id="res-count">2</strong></p>
+        <p><a class="button" href="reservations.html">Kelola Reservasi</a></p>
+      </div>
+    </div>
+
+    <section style="margin-top:18px">
+      <h3>Quick Actions</h3>
+      <p>
+        <a class="button" href="category-form.html">Tambah Kategori</a>
+        <a class="button" href="reservation-form.html" style="background:#6b7280; margin-left:8px">Buat Reservasi</a>
+      </p>
+    </section>
+  </main>
+
+  <script>
+
+    const catCountEl = document.getElementById('cat-count');
+    const resCountEl = document.getElementById('res-count');
+
+    // sessionStorage: simpan last visited
+    sessionStorage.setItem('lastVisitedDashboard', new Date().toISOString());
+
+    // PopUp 1: logout confirm
+    const logoutBtn = document.createElement('button');
+    logoutBtn.textContent = 'Logout';
+    logoutBtn.style.float = 'right';
+    logoutBtn.style.margin = '8px';
+    document.querySelector('.header .container').appendChild(logoutBtn);
+    logoutBtn.addEventListener('click', () => {
+      if (confirm('Yakin mau logout?')) {
+        sessionStorage.clear();
+        showMiniToast('Kamu berhasil logout.');
+        // Redirect simulated (jangan otomatis pindah file, cuma contoh)
+      }
+    });
+
+    // mini toast util (simple)
+    const miniToast = document.createElement('div');
+    miniToast.style = 'position:fixed;right:20px;top:20px;background:#111;color:#fff;padding:8px 12px;border-radius:6px;display:none;z-index:9999';
+    document.body.appendChild(miniToast);
+    function showMiniToast(msg) {
+      miniToast.textContent = msg;
+      miniToast.style.display = 'block';
+      setTimeout(() => miniToast.style.display = 'none', 2500);
+    }
+
+    // PopUp 2: quick stats modal
+    const statsModal = document.createElement('div');
+    statsModal.innerHTML = `
+      <div id="statsBox" style="display:none;position:fixed;top:15%;left:50%;transform:translateX(-50%);background:white;padding:20px;border-radius:8px;box-shadow:0 8px 30px rgba(0,0,0,0.1);z-index:1000;">
+        <h3>Quick Stats</h3>
+        <p id="statsText">Memuat...</p>
+        <button id="closeStats">Tutup</button>
+      </div>`;
+    document.body.appendChild(statsModal);
+    const statsBox = document.getElementById('statsBox');
+    const closeStats = document.getElementById('closeStats');
+
+    // open stats button
+    const statsBtn = document.createElement('button');
+    statsBtn.textContent = 'Lihat Quick Stats';
+    statsBtn.style.marginLeft = '12px';
+    document.querySelector('.header .container').appendChild(statsBtn);
+    statsBtn.addEventListener('click', async () => {
+      statsBox.style.display = 'block';
+      // fetch dummy summary
+      try {
+        const res = await fetch('https://jsonplaceholder.typicode.com/todos/1');
+        const json = await res.json();
+        document.getElementById('statsText').textContent = `Contoh summary: ${json.title}`;
+      } catch (e) {
+        document.getElementById('statsText').textContent = 'Gagal memuat statistik.';
+      }
+    });
+    closeStats.addEventListener('click', () => statsBox.style.display = 'none');
+
+    // Events:
+    // 1) click card untuk highlight
+    document.querySelectorAll('.card').forEach(c => {
+      c.addEventListener('click', () => {
+        c.style.boxShadow = '0 8px 20px rgba(34,197,94,0.15)';
+        showMiniToast('Card selected');
+      });
+    });
+
+    // 2) hover brand -> kecilkan opacity
+    const brand = document.querySelector('.brand');
+    brand.addEventListener('mouseenter', () => brand.style.opacity = '0.8');
+    brand.addEventListener('mouseleave', () => brand.style.opacity = '1');
+
+    // 3) keyboard shortcut 'g' to go home (simulate)
+    window.addEventListener('keydown', (e) => {
+      if (e.key.toLowerCase() === 'g') showMiniToast('Shortcut G pressed: go home (simulasi)');
+    });
+
+    // initial fetch to populate counts (dummy)
+    (async function loadCounts() {
+      try {
+        const r1 = await fetch('https://jsonplaceholder.typicode.com/users');
+        const users = await r1.json();
+        catCountEl.textContent = Math.min(6, users.length); // contoh
+        resCountEl.textContent = Math.min(5, users.length);
+      } catch (err) {
+        console.error('err loadCounts', err);
+      }
+    })();
+  </script>
+</body>
+</html>
