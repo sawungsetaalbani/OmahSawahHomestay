@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard - Omah Sawah Homestay</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="header">
+    <div class="container wrap">
+      <div class="brand">Omah Sawah Homestay - Dashboard</div>
+      <nav class="nav">
+        <a href="index.html">Home</a>
+        <a href="categories.html">Kategori</a>
+        <a href="reservations.html">Reservasi</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <h2>Ringkasan</h2>
+
+    <div class="grid-2">
+      <div class="card" id="catCard">
+        <h3>Categories</h3>
+        <p>Jumlah kategori: <strong id="catCount">0</strong></p>
+        <p><a class="button" href="categories.html">Kelola Kategori</a></p>
+      </div>
+
+      <div class="card" id="resCard">
+        <h3>Reservations</h3>
+        <p>Reservasi aktif: <strong id="resCount">0</strong></p>
+        <p><a class="button" href="reservations.html">Kelola Reservasi</a></p>
+      </div>
+    </div>
+
+    <section style="margin-top:18px">
+      <h3>Quick Actions</h3>
+      <p>
+        <a class="button" href="catagories-form.html" id="addCat">Tambah Kategori</a>
+        <a class="button" href="reservation-form.html" style="background:#6b7280; margin-left:8px" id="addRes">Buat Reservasi</a>
+      </p>
+    </section>
+
+    <section style="margin-top:25px;">
+      <h3>Simulasi Data Pengguna</h3>
+      <input type="text" id="username" placeholder="Masukkan nama kamu..." oninput="previewName()" />
+      <p>Nama kamu: <strong id="preview">-</strong></p>
+      <button onclick="saveUser()">Simpan Nama</button>
+    </section>
+
+    <section style="margin-top:25px;">
+      <h3>Data Homestay (Fetch API)</h3>
+      <button id="loadData">Muat Data Homestay</button>
+      <ul id="dataList"></ul>
+    </section>
+  </main>
+
+  <script>
+    // --- POPUP BOXES ---
+    document.getElementById("addCat").addEventListener("click", function(e) {
+      e.preventDefault();
+      alert("Kamu akan diarahkan ke halaman tambah kategori 🌾");
+      window.location.href = this.href;
+    });
+
+    document.getElementById("addRes").addEventListener("click", function(e) {
+      e.preventDefault();
+      if (confirm("Ingin membuat reservasi baru?")) {
+        window.location.href = this.href;
+      }
+    });
+
+    // --- EVENT: HOVER (mouseover) ---
+    document.getElementById("catCard").addEventListener("mouseover", () => {
+      document.getElementById("catCard").style.background = "#f3fdf0";
+    });
+    document.getElementById("catCard").addEventListener("mouseout", () => {
+      document.getElementById("catCard").style.background = "#fff";
+    });
+
+    // --- EVENT: INPUT ---
+    function previewName() {
+      const val = document.getElementById("username").value;
+      document.getElementById("preview").textContent = val || "-";
+    }
+
+    // --- WEB STORAGE ---
+    function saveUser() {
+      const name = document.getElementById("username").value.trim();
+      if (!name) {
+        alert("Nama tidak boleh kosong!");
+        return;
+      }
+      localStorage.setItem("user", name);
+      alert("Nama disimpan ✅");
+    }
+
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      document.getElementById("preview").textContent = storedUser;
+    }
+
+    // --- ASYNCHRONOUS FETCH (PROMISE) ---
+    async function fetchData() {
+      try {
+        const res = await fetch("https://jsonplaceholder.typicode.com/users");
+        const data = await res.json();
+        const list = document.getElementById("dataList");
+        list.innerHTML = "";
+        data.slice(0, 5).forEach(item => {
+          const li = document.createElement("li");
+          li.textContent = `${item.name} (${item.address.city})`;
+          list.appendChild(li);
+        });
+      } catch (err) {
+        console.error("Gagal mengambil data:", err);
+      }
+    }
+
+    document.getElementById("loadData").addEventListener("click", fetchData);
+
+    // --- SIMULASI PENGHITUNG DATA (PROMISE) ---
+    function getCategoryCount() {
+      return new Promise(resolve => {
+        setTimeout(() => resolve(4), 800);
+      });
+    }
+    function getReservationCount() {
+      return new Promise(resolve => {
+        setTimeout(() => resolve(2), 1200);
+      });
+    }
+
+    // Jalankan promise untuk menampilkan data di dashboard
+    Promise.all([getCategoryCount(), getReservationCount()]).then(values => {
+      document.getElementById("catCount").textContent = values[0];
+      document.getElementById("resCount").textContent = values[1];
+    });
+  </script>
+</body>
+</html>
